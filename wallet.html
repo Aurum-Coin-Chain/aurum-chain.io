@@ -9,28 +9,24 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
       background-color: #0d0d0d;
       color: #ffffff;
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
+      padding: 20px;
       text-align: center;
     }
 
     .logo {
       width: 140px;
-      margin: 40px auto 10px;
+      margin: 40px auto 20px;
     }
 
     .container {
       width: 100%;
       max-width: 400px;
-      padding: 0 20px;
-      box-sizing: border-box;
     }
 
     .balance {
@@ -55,8 +51,8 @@
       padding: 12px 20px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 20px;
       width: 100%;
+      margin-top: 20px;
     }
 
     button:hover {
@@ -97,7 +93,7 @@
     <button onclick="connectWallet()">Connect Wallet</button>
 
     <div class="balance" id="balanceBox" style="display:none;">
-      <img src="aurum-icon-512x512.png" alt="AUR Icon" />
+      <img src="favicon-64-transparent.png" alt="AUR Icon" />
       <span id="balance">– AUR</span>
     </div>
 
@@ -119,24 +115,25 @@
     let provider, signer, tokenContract;
 
     async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          signer = provider.getSigner();
-          tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+      if (typeof window.ethereum === 'undefined') {
+        alert("No Ethereum wallet detected. Please install MetaMask, BitBox, Rabby, or Coinbase Wallet.");
+        return;
+      }
 
-          const address = await signer.getAddress();
-          const balance = await tokenContract.balanceOf(address);
-          const formatted = ethers.utils.formatUnits(balance, 18);
+      try {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
 
-          document.getElementById("balance").innerText = formatted + " AUR";
-          document.getElementById("balanceBox").style.display = "flex";
-        } catch (err) {
-          document.getElementById("status").innerText = "Connection failed: " + err.message;
-        }
-      } else {
-        alert("No Ethereum-compatible wallet found. Please install MetaMask, BitBox, Rabby, or Coinbase Wallet.");
+        const address = await signer.getAddress();
+        const balance = await tokenContract.balanceOf(address);
+        const formatted = ethers.utils.formatUnits(balance, 18);
+
+        document.getElementById("balance").innerText = formatted + " AUR";
+        document.getElementById("balanceBox").style.display = "flex";
+      } catch (err) {
+        document.getElementById("status").innerText = "Connection failed: " + err.message;
       }
     }
 
