@@ -9,48 +9,63 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
       background-color: #0d0d0d;
-      color: #fff;
-      padding: 20px;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
       text-align: center;
+      padding: 20px;
     }
-    header img {
-      width: 100px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      color: #ffd700;
-      font-weight: normal;
-      margin-top: 0;
-    }
-    input, button {
-      margin: 10px;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-    }
-    input {
-      width: 80%;
-    }
-    button {
-      background-color: #ffd700;
-      color: #000;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e6c200;
+    .logo {
+      width: 120px;
+      margin: 30px auto 10px;
     }
     .container {
       max-width: 500px;
       margin: auto;
     }
+    button {
+      background-color: #d4af37;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #bfa12f;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+    }
+    .balance {
+      margin-top: 30px;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .balance img {
+      width: 24px;
+      height: 24px;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #aaa;
+    }
     a {
-      color: #999;
+      color: #888;
       text-decoration: none;
       display: inline-block;
-      margin-top: 30px;
+      margin-top: 40px;
       font-size: 14px;
     }
   </style>
@@ -58,14 +73,14 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <img src="aurum-icon-512x512.png" alt="AURUM Logo" />
-      <h1>AURUM Wallet</h1>
-    </header>
+    <img src="aurum-icon-512x512.png" alt="AURUM Logo" class="logo" />
 
     <button onclick="connectWallet()">Wallet verbinden</button>
-    <p id="walletAddress">Adresse: –</p>
-    <p id="balance">AURUM-Balance: –</p>
+
+    <div class="balance" id="balanceBox" style="display:none;">
+      <img src="favicon-64-transparent.png" alt="AUR Icon" />
+      <span id="balance">– AUR</span>
+    </div>
 
     <input type="text" id="recipient" placeholder="Empfängeradresse" />
     <input type="number" id="amount" placeholder="Betrag in AUR" />
@@ -86,26 +101,39 @@
 
     async function connectWallet() {
       if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        const address = await signer.getAddress();
-        document.getElementById("walletAddress").innerText = "Adresse: " + address;
-        tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
-        const balance = await tokenContract.balanceOf(address);
-        document.getElementById("balance").innerText = "AURUM-Balance: " + ethers.utils.formatUnits(balance, 18);
+        try {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+          tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+          const address = await signer.getAddress();
+          const balance = await tokenContract.balanceOf(address);
+          const formatted = ethers.utils.formatUnits(balance, 18);
+
+          document.getElementById("balance").innerText = formatted + " AUR";
+          document.getElementById("balanceBox").style.display = "flex";
+        } catch (err) {
+          document.getElementById("status").innerText = "Verbindung fehlgeschlagen: " + err.message;
+        }
       } else {
-        alert("Bitte eine Ethereum-kompatible Wallet installieren.");
+        alert("Keine Ethereum-kompatible Wallet gefunden. Bitte MetaMask, BitBox oder Rabby installieren.");
       }
     }
 
     async function sendAUR() {
       const to = document.getElementById("recipient").value;
       const amount = document.getElementById("amount").value;
-      const amountWei = ethers.utils.parseUnits(amount, 18);
+
+      if (!to || !amount) {
+        document.getElementById("status").innerText = "Bitte Adresse und Betrag eingeben.";
+        return;
+      }
+
       try {
+        const amountWei = ethers.utils.parseUnits(amount, 18);
         const tx = await tokenContract.transfer(to, amountWei);
-        document.getElementById("status").innerText = "Sende... TX Hash: " + tx.hash;
+        document.getElementById("status").innerText = "Sende... TX: " + tx.hash;
         await tx.wait();
         document.getElementById("status").innerText = "AURUM erfolgreich gesendet.";
       } catch (err) {
