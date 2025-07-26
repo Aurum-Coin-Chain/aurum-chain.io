@@ -1,0 +1,16 @@
+{
+  "name": "AURUM Wallet",
+  "short_name": "AURUM Wallet",
+  "start_url": "wallet.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFD700",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "aurum-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
