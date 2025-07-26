@@ -9,20 +9,44 @@
   <style>
     body {
       margin: 0;
+      padding: 0;
       background-color: #0d0d0d;
       color: #ffffff;
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
       text-align: center;
-      padding: 20px;
     }
+
     .logo {
-      width: 120px;
-      margin: 30px auto 10px;
+      width: 140px;
+      margin: 40px auto 10px;
     }
+
     .container {
-      max-width: 500px;
-      margin: auto;
+      width: 100%;
+      max-width: 400px;
+      padding: 0 20px;
+      box-sizing: border-box;
     }
+
+    .balance {
+      margin-top: 25px;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .balance img {
+      width: 22px;
+      height: 22px;
+    }
+
     button {
       background-color: #d4af37;
       color: #000;
@@ -32,35 +56,30 @@
       font-size: 16px;
       cursor: pointer;
       margin-top: 20px;
+      width: 100%;
     }
+
     button:hover {
       background-color: #bfa12f;
     }
+
     input {
-      width: 80%;
+      width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
+      margin-top: 15px;
+      border-radius: 5px;
       border: none;
       font-size: 16px;
+      background-color: #222;
+      color: #fff;
     }
-    .balance {
-      margin-top: 30px;
-      font-size: 18px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-    .balance img {
-      width: 24px;
-      height: 24px;
-    }
+
     #status {
       margin-top: 20px;
       font-size: 14px;
       color: #aaa;
     }
+
     a {
       color: #888;
       text-decoration: none;
@@ -72,22 +91,22 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <img src="aurum-icon-512x512.png" alt="AURUM Logo" class="logo" />
+  <img src="aurum-icon-512x512.png" alt="AURUM Logo" class="logo" />
 
-    <button onclick="connectWallet()">Wallet verbinden</button>
+  <div class="container">
+    <button onclick="connectWallet()">Connect Wallet</button>
 
     <div class="balance" id="balanceBox" style="display:none;">
       <img src="favicon-64-transparent.png" alt="AUR Icon" />
       <span id="balance">– AUR</span>
     </div>
 
-    <input type="text" id="recipient" placeholder="Empfängeradresse" />
-    <input type="number" id="amount" placeholder="Betrag in AUR" />
-    <button onclick="sendAUR()">AURUM senden</button>
+    <input type="text" id="recipient" placeholder="Recipient Address" />
+    <input type="number" id="amount" placeholder="Amount in AUR" />
+    <button onclick="sendAUR()">Send AURUM</button>
 
     <p id="status"></p>
-    <a href="index.html">Zurück zur Hauptseite</a>
+    <a href="index.html">← Back to Main Page</a>
   </div>
 
   <script>
@@ -114,10 +133,10 @@
           document.getElementById("balance").innerText = formatted + " AUR";
           document.getElementById("balanceBox").style.display = "flex";
         } catch (err) {
-          document.getElementById("status").innerText = "Verbindung fehlgeschlagen: " + err.message;
+          document.getElementById("status").innerText = "Connection failed: " + err.message;
         }
       } else {
-        alert("Keine Ethereum-kompatible Wallet gefunden. Bitte MetaMask, BitBox oder Rabby installieren.");
+        alert("No Ethereum-compatible wallet found. Please install MetaMask, BitBox, Rabby, or Coinbase Wallet.");
       }
     }
 
@@ -126,18 +145,18 @@
       const amount = document.getElementById("amount").value;
 
       if (!to || !amount) {
-        document.getElementById("status").innerText = "Bitte Adresse und Betrag eingeben.";
+        document.getElementById("status").innerText = "Please enter recipient and amount.";
         return;
       }
 
       try {
         const amountWei = ethers.utils.parseUnits(amount, 18);
         const tx = await tokenContract.transfer(to, amountWei);
-        document.getElementById("status").innerText = "Sende... TX: " + tx.hash;
+        document.getElementById("status").innerText = "Sending... TX: " + tx.hash;
         await tx.wait();
-        document.getElementById("status").innerText = "AURUM erfolgreich gesendet.";
+        document.getElementById("status").innerText = "AURUM sent successfully.";
       } catch (err) {
-        document.getElementById("status").innerText = "Fehler: " + err.message;
+        document.getElementById("status").innerText = "Error: " + err.message;
       }
     }
   </script>
