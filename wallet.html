@@ -3,81 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AURUM</title>
-  <meta name="theme-color" content="#000000" />
+  <title>AURUM Wallet</title>
+  <meta name="theme-color" content="#ffffff" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="favicon-64-transparent.png" type="image/png" />
   <style>
     body {
-      margin: 0;
-      background-color: #0d0d0d;
-      color: white;
+      background-color: #ffffff;
+      color: #111;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 20px;
+      text-align: center;
+      padding: 40px 20px;
     }
-
     .logo {
-      width: 130px;
-      margin-top: 30px;
+      width: 120px;
+      margin-bottom: 30px;
     }
-
-    .balance {
-      margin: 25px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      color: #ccc;
-    }
-
-    .balance img {
-      width: 20px;
-      height: 20px;
-    }
-
-    input, button {
-      width: 100%;
-      max-width: 350px;
+    .button, input {
       padding: 12px;
-      margin: 10px 0;
-      border: none;
+      margin: 8px 0;
+      width: 100%;
+      max-width: 320px;
+      font-size: 16px;
       border-radius: 5px;
-      font-size: 15px;
+      border: none;
     }
-
     input {
-      background-color: #222;
-      color: #fff;
+      background-color: #f1f1f1;
     }
-
-    button {
+    .button {
       background-color: #d4af37;
       color: black;
       font-weight: bold;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #bfa32f;
+    .button:hover {
+      background-color: #c9a22d;
     }
-
-    #status {
-      margin-top: 15px;
-      color: #aaa;
-      font-size: 13px;
+    .balance {
+      margin: 20px auto;
+      font-size: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      color: #333;
     }
-
-    a {
-      margin-top: 40px;
-      color: #888;
-      font-size: 13px;
-      text-decoration: none;
+    .balance img {
+      width: 20px;
+      height: 20px;
+    }
+    #qrModal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
+    }
+    #qrContent {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      position: relative;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
     }
   </style>
-
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
 </head>
@@ -85,19 +90,27 @@
 
   <img src="aurum-icon-512x512.png" alt="AURUM Logo" class="logo" />
 
-  <button onclick="connectWallet()">Connect Wallet</button>
+  <button class="button" onclick="connectWallet()">Connect Wallet</button>
 
-  <div class="balance" id="balanceBox" style="display:none;">
-    <img src="favicon-64-transparent.png" alt="AUR" />
+  <div id="balanceBox" class="balance" style="display: none;">
+    <img src="favicon-64-transparent.png" alt="AUR Logo" />
     <span id="balanceText">– AUR</span>
   </div>
 
   <input type="text" id="recipient" placeholder="Recipient Address" />
   <input type="text" id="amount" placeholder="Amount in AUR" />
-  <button onclick="sendAUR()">Send AURUM</button>
+  <button class="button" onclick="sendAUR()">Send AURUM</button>
 
-  <p id="status"></p>
-  <a href="index.html">← Back to Main Page</a>
+  <div id="status" class="balance" style="margin-top: 20px;"></div>
+
+  <!-- QR Modal -->
+  <div id="qrModal">
+    <div id="qrContent">
+      <span id="closeBtn" onclick="closeQR()">&times;</span>
+      <p style="margin-bottom:10px;">Scan QR with your wallet</p>
+      <div id="qrContainer"></div>
+    </div>
+  </div>
 
   <script>
     const tokenAddress = "0x890E2f6c06c8e007e6f60D3eE0A9EdFB4134e30D";
@@ -111,12 +124,20 @@
     async function connectWallet() {
       const walletConnectProvider = new WalletConnectProvider.default({
         rpc: {
-          1: "https://rpc.ankr.com/eth", // öffentliches Mainnet-RPC
+          1: "https://rpc.ankr.com/eth"
         },
-        chainId: 1
+        qrcode: true
+      });
+
+      walletConnectProvider.connector.on("display_uri", (err, payload) => {
+        if (err) throw err;
+        document.getElementById("qrContainer").innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${payload.params[0]}&size=220x220" />`;
+        document.getElementById("qrModal").style.display = "block";
       });
 
       await walletConnectProvider.enable();
+      document.getElementById("qrModal").style.display = "none";
+
       provider = new ethers.providers.Web3Provider(walletConnectProvider);
       signer = provider.getSigner();
       token = new ethers.Contract(tokenAddress, tokenABI, signer);
@@ -129,12 +150,16 @@
       document.getElementById("balanceBox").style.display = "flex";
     }
 
+    function closeQR() {
+      document.getElementById("qrModal").style.display = "none";
+    }
+
     async function sendAUR() {
       const to = document.getElementById("recipient").value;
       const amount = document.getElementById("amount").value;
 
       if (!to || !amount) {
-        document.getElementById("status").innerText = "Enter address and amount.";
+        document.getElementById("status").innerText = "Enter recipient and amount.";
         return;
       }
 
@@ -143,7 +168,7 @@
         const tx = await token.transfer(to, amountWei);
         document.getElementById("status").innerText = "Sending... TX: " + tx.hash;
         await tx.wait();
-        document.getElementById("status").innerText = "AURUM sent successfully.";
+        document.getElementById("status").innerText = "Sent successfully.";
       } catch (err) {
         document.getElementById("status").innerText = "Error: " + err.message;
       }
