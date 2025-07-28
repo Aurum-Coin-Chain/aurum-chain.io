@@ -1,181 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AURUM Wallet</title>
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="favicon-64-transparent.png" type="image/png" />
-  <style>
-    body {
-      background-color: #ffffff;
-      color: #111;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 30px 20px;
-    }
-    .logo {
-      width: 120px;
-      margin-bottom: 20px;
-    }
-    .button, input {
-      padding: 12px;
-      margin: 10px auto;
-      width: 100%;
-      max-width: 340px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-      display: block;
-    }
-    input {
-      background-color: #f1f1f1;
-    }
-    .button {
-      background-color: #d4af37;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .balance {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 20px auto;
-      font-size: 16px;
-      color: #333;
-      gap: 8px;
-    }
-    .balance img {
-      width: 20px;
-      height: 20px;
-    }
-    #qrModal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.75);
-    }
-    #qrContent {
-      background-color: white;
-      margin: 15% auto;
-      padding: 20px;
-      max-width: 340px;
-      text-align: center;
-      border-radius: 8px;
-      position: relative;
-    }
-    #closeBtn {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      font-size: 20px;
-      color: #000;
-      cursor: pointer;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
-</head>
-<body>
+<!-- ✅ AURUM Web3 Wallet Connect -->
+<section id="wallet-section" style="text-align: center; padding: 2rem; background: #0a0a0a; color: #f5d442;">
+  <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">🔗 Connect your Wallet</h2>
 
-  <img src="aurum-icon-512x512.png" alt="AURUM Logo" class="logo" />
+  <button id="connectBtn" onclick="connectWallet()" style="
+    background-color: #111;
+    color: #f5d442;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: background 0.3s ease;">
+    Connect Wallet
+  </button>
 
-  <button class="button" onclick="connectWallet()">Connect Wallet</button>
-
-  <div id="balanceBox" class="balance" style="display: none;">
-    <img src="favicon-64-transparent.png" alt="AUR" />
-    <span id="balanceText">– AUR</span>
+  <div id="walletInfo" style="display: none;">
+    <p><strong>👛 Wallet:</strong> <span id="walletAddress"></span></p>
+    <p><strong>🟡 ETH Balance:</strong> <span id="ethBalance"></span> ETH</p>
+    <p><strong>🪙 AUR Balance:</strong> <span id="aurBalance"></span> AUR</p>
+    <img src="/aurum_logo_200x200/favicon-64-transparent.png" width="64" style="margin-top:1rem;" alt="Balance Icon" />
   </div>
+</section>
 
-  <input type="text" id="recipient" placeholder="Recipient Address" />
-  <input type="text" id="amount" placeholder="Amount in AUR" />
-  <button class="button" onclick="sendAUR()">Send AURUM</button>
+<script>
+  const AUR_TOKEN = {
+    address: '0x890E2f6c06c8e007e6f60D3eE0A9EdFB4134e30D',
+    symbol: 'AUR',
+    decimals: 18,
+    image: 'https://aurum-chain.io/aurum_logo_200x200/aurum-icon-512x512.png'
+  };
 
-  <div id="status" style="margin-top: 15px; font-size: 14px; color: #666;"></div>
-
-  <div id="qrModal">
-    <div id="qrContent">
-      <span id="closeBtn" onclick="closeQR()">&times;</span>
-      <p>Scan with WalletConnect</p>
-      <div id="qrContainer"></div>
-    </div>
-  </div>
-
-  <script>
-    const tokenAddress = "0x890E2f6c06c8e007e6f60D3eE0A9EdFB4134e30D";
-    const tokenABI = [
-      "function balanceOf(address) view returns (uint256)",
-      "function transfer(address to, uint amount) returns (bool)"
-    ];
-
-    let provider, signer, token;
-
-    function isMobileBrowser() {
-      return /android|iphone|ipad|ipod/i.test(navigator.userAgent) && window.ethereum;
+  async function connectWallet() {
+    if (typeof window.ethereum === 'undefined') {
+      alert('MetaMask nicht gefunden. Bitte installieren: https://metamask.io');
+      return;
     }
 
-    async function connectWallet() {
-      const walletConnectProvider = new WalletConnectProvider.default({
-        rpc: {
-          1: "https://rpc.ankr.com/eth"
-        },
-        qrcode: false
+    try {
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+      document.getElementById('walletAddress').innerText = account;
+      document.getElementById('walletInfo').style.display = 'block';
+
+      // ETH-Balance anzeigen
+      const ethBalance = await ethereum.request({
+        method: 'eth_getBalance',
+        params: [account, 'latest']
+      });
+      const ethInEth = parseFloat(parseInt(ethBalance, 16) / 1e18).toFixed(4);
+      document.getElementById('ethBalance').innerText = ethInEth;
+
+      // AURUM-Balance anzeigen
+      const aurBalance = await getTokenBalance(account);
+      document.getElementById('aurBalance').innerText = aurBalance;
+
+      // Token zu MetaMask hinzufügen
+      await ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: AUR_TOKEN
+        }
       });
 
-      if (!isMobileBrowser()) {
-        walletConnectProvider.connector.on("display_uri", (err, payload) => {
-          if (err) throw err;
-          document.getElementById("qrContainer").innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${payload.params[0]}&size=220x220" />`;
-          document.getElementById("qrModal").style.display = "block";
-        });
-        walletConnectProvider.qrcode = true;
-      }
-
-      await walletConnectProvider.enable();
-      document.getElementById("qrModal").style.display = "none";
-
-      provider = new ethers.providers.Web3Provider(walletConnectProvider);
-      signer = provider.getSigner();
-      token = new ethers.Contract(tokenAddress, tokenABI, signer);
-
-      const address = await signer.getAddress();
-      const balance = await token.balanceOf(address);
-      const formatted = ethers.utils.formatUnits(balance, 18);
-
-      document.getElementById("balanceText").innerText = formatted + " AUR";
-      document.getElementById("balanceBox").style.display = "flex";
+    } catch (error) {
+      console.error('Fehler beim Wallet Connect:', error);
+      alert('Fehler: ' + error.message);
     }
+  }
 
-    function closeQR() {
-      document.getElementById("qrModal").style.display = "none";
-    }
+  async function getTokenBalance(account) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const abi = ["function balanceOf(address) view returns (uint256)"];
+    const contract = new ethers.Contract(AUR_TOKEN.address, abi, provider);
+    const rawBalance = await contract.balanceOf(account);
+    const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, AUR_TOKEN.decimals)).toFixed(4);
+    return formatted;
+  }
+</script>
 
-    async function sendAUR() {
-      const to = document.getElementById("recipient").value;
-      const amount = document.getElementById("amount").value;
-
-      if (!to || !amount) {
-        document.getElementById("status").innerText = "Enter recipient and amount.";
-        return;
-      }
-
-      try {
-        const amountWei = ethers.utils.parseUnits(amount, 18);
-        const tx = await token.transfer(to, amountWei);
-        document.getElementById("status").innerText = "Sending... TX: " + tx.hash;
-        await tx.wait();
-        document.getElementById("status").innerText = "Sent successfully.";
-      } catch (err) {
-        document.getElementById("status").innerText = "Error: " + err.message;
-      }
-    }
-  </script>
-
-</body>
-</html>
+<!-- ✅ ethers.js für AUR-Balance -->
+<script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.umd.min.js"></script>
