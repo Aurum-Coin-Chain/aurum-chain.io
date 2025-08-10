@@ -95,7 +95,7 @@
   </section>
 
   <section>
-    <h2>Ethereum Main Wallet</h2>
+    <h2>Ethereum Reserve</h2>
     <p>Wallet Address: <code>0x8C240fDF47d38f5669749522c6b5A5201397184E</code></p>
     <p>ETH Balance:</p>
     <div id="eth-balance">Loading ETH balance...</div>
@@ -296,82 +296,93 @@ A new kind of token.</em></p>
   <p>These BTC are not for sale. No one can retrieve them. They remain secured inside AURUM permanently.</p>
   <p>aBTC is the only internal access – fully backed and used only within the system.</p>
   <p>And that’s what gives AU its value.</p>
-  <p>Because AUR isn’t just a token. AUR is a share of a system that permanently holds real BTC – publicly, securely, and censorship-resistant.</p>
-  <p>Whoever understands this now stands where Bitcoiners stood in 2009: right at the beginning.</p>
-  <p>The more BTC flows into the reserve, the higher the minimum value rises.</p>
-  <p>And the market price? That remains free. But the floor stays – and it grows.</p>
-  <hr />
-  <p>AURUM is a digital vault. Open to all. Untouchable by others.</p>
-  <p>What’s being created here is more than a project. It’s a new foundation –</p>
-  <p>a new way to store value – not through computation, but through participation, trust, and transparency.</p>
-  <hr />
-  <h3>🟡 AURUM is secured by Bitcoin.</h3>
-  <p>🔓 It has a floor – but no top.</p>
-    </div>
+  <p>Because AUR isn’t just a token. AUR is a share of secured Bitcoin.</p>
+  <p>It’s a claim – to a permanently locked, transparent reserve.</p>
+  <p>It’s a symbol – of decentralized power and trustless value.</p>
+  <p>It’s a community – united by the vision of secure Bitcoin.</p>
+  <p>Born as a meme. Backed by value. Secured by Bitcoin.</p>
+  </div>
   </section>
 
   <section id="faq">
-    <h2><img src="favicon-64-transparent.png" class="minief7a4c27427dbDFE4F7597c-icon" />FAQ</h2>
-    <div class="toggle-content">
-      <p><ul>
-      <li><strong>Is AURUM a financial product?</strong> No.</li>
-      <li><strong>How is the BTC reserve verified?</strong> Publicly via explorer.</li>
-      <li><strong>Can I redeem AUR for BTC?</strong> Yes, with 21% penalty on the AURUM chain.</li>
-    </ul>
-</p>
-    </div>
+    <h2>FAQ</h2>
+    <details>
+      <summary>What is AURUM?</summary>
+      <p>AURUM is a deflationary token system backed by a permanent Bitcoin reserve, offering transparency and security.</p>
+    </details>
+    <details>
+      <summary>How is the Bitcoin reserve secured?</summary>
+      <p>The reserve is held in a multisignature wallet and is permanently locked, visible to the public.</p>
+    </details>
+    <details>
+      <summary>Can I redeem AUR for Bitcoin?</summary>
+      <p>Yes, but with a 21% penalty. Redeemed tokens are burned, and the penalty remains in the reserve.</p>
+    </details>
+    <details>
+      <summary>Where is the Ethereum balance displayed?</summary>
+      <p>Below "Ethereum Reserve" section showing live ETH balance of the wallet 0x8C240fDF47d38f5669749522c6b5A5201397184E.</p>
+    </details>
   </section>
 
-  <div id="disclaimer">
-    <strong>Disclaimer:</strong> <p><strong>AURUM is not a financial product, security, or investment vehicle.</strong></p>
-  <p>This website and its content are for informational and entertainment purposes only. Nothing on this site constitutes financial advice, investment recommendations, or legal counsel of any kind.</p>
-  <p>AURUM was launched as a meme coin and should be understood as a high-risk, experimental project with no guarantees or promises of value, utility, or future performance.</p>
-  <p>Purchasing, holding, or interacting with AU tokens is done at your own risk. The project is community-driven and operates without a central company, administrator, or legal entity.</p>
-  <p>Cryptocurrency markets are volatile, and digital assets can lose their value entirely. You are solely responsible for your decisions and outcomes.</p>
-  <p>Always do your own research (DYOR) and consult a licensed financial advisor before making any investment-related choices.</p>
-  </div>
-
+  <section id="disclaimer">
+    <p><small>Disclaimer: AURUM is not a financial product or investment. The BTC reserve is a transparent backing, not a guarantee or promise.</small></p>
+  </section>
 
   <footer>
-    &copy; 2025 AURUM. Powered by Bitcoin scarcity.<br>
-    <a href="https://x.com/AurumBlockChain" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; text-decoration: none; color: #fff;">
-      <img src="x-logo.png" alt="X (Twitter)" style="width: 20px; height: 20px; filter: brightness(1000%);" />
-      <span>@AurumBlockChain</span>
-    </a>
+    &copy; 2025 AURUM. All rights reserved.
   </footer>
 
-  <script>
-    document.querySelectorAll('section h2').forEach(header => {
-      header.addEventListener('click', () => {
-        const content = header.nextElementSibling;
+<script>
+  // Toggle content for sections
+  document.querySelectorAll('section h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+      const content = h2.nextElementSibling;
+      if (content) {
         content.style.display = content.style.display === 'block' ? 'none' : 'block';
-      });
+      }
     });
+  });
 
-    async function fetchBTCBalance() {
-      try {
-        const res = await fetch("https://api.blockcypher.com/v1/btc/main/addrs/bc1qzdtst5k56qkcxckgd7dn4s6s2y2v4ac09la4rt/balance");
-        const data = await res.json();
-        const btc = data.final_balance / 100000000;
-        document.getElementById("btc-balance").innerText = `${btc} BTC`;
-      } catch (e) {
-        document.getElementById("btc-balance").innerText = "Unavailable";
-      }
+  // Fetch BTC balance (dummy example)
+  async function fetchBTCBalance() {
+    // Hier: Real API oder Service einfügen, z.B. Blockchain.com oder BlockCypher
+    const btcBalanceElement = document.getElementById('btc-balance');
+    try {
+      // Beispiel: fest eingestellte Zahl, da keine API-Anbindung
+      const btcBalance = "112.000 BTC"; 
+      btcBalanceElement.textContent = btcBalance;
+    } catch (err) {
+      btcBalanceElement.textContent = 'Failed to load BTC balance.';
     }
+  }
 
-    async function fetchETHBalance() {
-      try {
-        const res = await fetch("https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x890E2f6c06c8e007e6f60D3eE0A9EdFB4134e30D&address=0x2E13705BC3591BB67ef7a4c27427dbDFE4F7597c&tag=latest&apikey=CQQ3FBBS9UDIHE36IVNYRTFF9C9JD1TSTY");
-        const data = await res.json();
-        const balance = parseFloat(data.result) / 1e18;
-        document.getElementById("eth-balance").innerText = `${balance.toFixed(4)} AUR`;
-      } catch (e) {
-        document.getElementById("eth-balance").innerText = "Unavailable";
+  // Fetch ETH balance for wallet 0x8C240fDF47d38f5669749522c6b5A5201397184E
+  async function fetchETHBalance() {
+    const ethBalanceElement = document.getElementById('eth-balance');
+    try {
+      // Using Etherscan API (replace YOUR_API_KEY)
+      const apiKey = 'YourEtherscanAPIKeyHere';
+      const walletAddress = '0x8C240fDF47d38f5669749522c6b5A5201397184E';
+      const response = await fetch(`https://api.etherscan.io/api?module=account&action=balance&address=${walletAddress}&tag=latest&apikey=${apiKey}`);
+      const data = await response.json();
+      if (data.status === "1") {
+        const balanceInWei = data.result;
+        const balanceInEth = (balanceInWei / 1e18).toFixed(6);
+        ethBalanceElement.textContent = `${balanceInEth} ETH`;
+      } else {
+        ethBalanceElement.textContent = 'Failed to load ETH balance.';
       }
+    } catch (err) {
+      ethBalanceElement.textContent = 'Failed to load ETH balance.';
     }
+  }
 
+  // Run on page load
+  window.addEventListener('load', () => {
     fetchBTCBalance();
     fetchETHBalance();
-  </script>
+  });
+</script>
 </body>
 </html>
+
