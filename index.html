@@ -353,59 +353,38 @@ A new kind of token.</em></p>
     </a>
   </footer>
 
-
-<div id="btc-balance">Loading BTC...</div>
-<div id="aur-balance">Loading AUR...</div>
-
-<script>
-async function fetchBTCBalance() {
-  try {
-    const res = await fetch("https://api.blockcypher.com/v1/btc/main/addrs/bc1qxvea7muxrshy40szzjmdq2hvp2u6dzn2tnm6wx/balance");
-    const data = await res.json();
-    const btc = data.final_balance / 100000000;
-    document.getElementById("btc-balance").innerText = `${btc} BTC`;
-  } catch (e) {
-    document.getElementById("btc-balance").innerText = "Unavailable";
-  }
-}
-
-async function fetchAURBalance() {
-  const wallet = "7YKdWGMdAnUzu7AS2381SSWhYrunnRh2sUcvND7F3S4T";
-  const mint = "mvQAVmStRt3mCfLV9K5mnpmum7Q4MXWeb1quZuHRgem";
-
-  const body = {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "getTokenAccountsByOwner",
-    params: [
-      wallet,
-      { mint },
-      { encoding: "jsonParsed" }
-    ]
-  };
-
-  try {
-    const res = await fetch("https://api.mainnet-beta.solana.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+  <script>
+    document.querySelectorAll('section h2').forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+      });
     });
-    const data = await res.json();
-    let balance = 0;
-    if (data.result && data.result.value.length > 0) {
-      const info = data.result.value[0].account.data.parsed.info.tokenAmount;
-      balance = info.amount / Math.pow(10, info.decimals);
+
+    async function fetchBTCBalance() {
+      try {
+        const res = await fetch("https://api.blockcypher.com/v1/btc/main/addrs/bc1qxvea7muxrshy40szzjmdq2hvp2u6dzn2tnm6wx/balance");
+        const data = await res.json();
+        const btc = data.final_balance / 100000000;
+        document.getElementById("btc-balance").innerText = `${btc} BTC`;
+      } catch (e) {
+        document.getElementById("btc-balance").innerText = "Unavailable";
+      }
     }
-    document.getElementById("aur-balance").innerText = `${balance} AUR`;
-  } catch (e) {
-    document.getElementById("aur-balance").innerText = "Unavailable";
-  }
-}
 
-fetchBTCBalance();
-fetchAURBalance();
-</script>
+    async function fetchETHBalance() {
+      try {
+        const res = await fetch("https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=0x890E2f6c06c8e007e6f60D3eE0A9EdFB4134e30D&address=0x2E13705BC3591BB67ef7a4c27427dbDFE4F7597c&tag=latest&apikey=CQQ3FBBS9UDIHE36IVNYRTFF9C9JD1TSTY");
+        const data = await res.json();
+        const balance = parseFloat(data.result) / 1e18;
+        document.getElementById("eth-balance").innerText = `${balance.toFixed(4)} AUR`;
+      } catch (e) {
+        document.getElementById("eth-balance").innerText = "Unavailable";
+      }
+    }
 
-
+    fetchBTCBalance();
+    fetchETHBalance();
+  </script>
 </body>
 </html>
