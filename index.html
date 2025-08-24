@@ -393,7 +393,8 @@ async function fetchAURBalance() {
     const data = await res.json();
     let balance = 0;
     if (data.result && data.result.value.length > 0) {
-      balance = data.result.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+      const info = data.result.value[0].account.data.parsed.info.tokenAmount;
+      balance = info.amount / Math.pow(10, info.decimals);
     }
     document.getElementById("aur-balance").innerText = `${balance} AUR`;
   } catch (e) {
@@ -401,7 +402,6 @@ async function fetchAURBalance() {
   }
 }
 
-// Beide Balances laden
 fetchBTCBalance();
 fetchAURBalance();
 </script>
