@@ -353,22 +353,34 @@ A new kind of token.</em></p>
     </a>
   </footer>
 
-  <div id="aur-balance">Loading AUR...</div>
+
+<div id="btc-balance">Loading BTC...</div>
+<div id="aur-balance">Loading AUR...</div>
 
 <script>
+async function fetchBTCBalance() {
+  try {
+    const res = await fetch("https://api.blockcypher.com/v1/btc/main/addrs/bc1qxvea7muxrshy40szzjmdq2hvp2u6dzn2tnm6wx/balance");
+    const data = await res.json();
+    const btc = data.final_balance / 100000000;
+    document.getElementById("btc-balance").innerText = `${btc} BTC`;
+  } catch (e) {
+    document.getElementById("btc-balance").innerText = "Unavailable";
+  }
+}
+
 async function fetchAURBalance() {
   const wallet = "7YKdWGMdAnUzu7AS2381SSWhYrunnRh2sUcvND7F3S4T";
   const mint = "mvQAVmStRt3mCfLV9K5mnpmum7Q4MXWeb1quZuHRgem";
 
-
   const body = {
-    "jsonrpc":"2.0",
-    "id":1,
-    "method":"getTokenAccountsByOwner",
-    "params":[
+    jsonrpc: "2.0",
+    id: 1,
+    method: "getTokenAccountsByOwner",
+    params: [
       wallet,
-      { "mint": mint },
-      { "encoding": "jsonParsed" }
+      { mint },
+      { encoding: "jsonParsed" }
     ]
   };
 
@@ -380,17 +392,20 @@ async function fetchAURBalance() {
     });
     const data = await res.json();
     let balance = 0;
-    if(data.result.value.length > 0) {
+    if (data.result && data.result.value.length > 0) {
       balance = data.result.value[0].account.data.parsed.info.tokenAmount.uiAmount;
     }
     document.getElementById("aur-balance").innerText = `${balance} AUR`;
-  } catch(e) {
+  } catch (e) {
     document.getElementById("aur-balance").innerText = "Unavailable";
   }
 }
 
+// Beide Balances laden
+fetchBTCBalance();
 fetchAURBalance();
 </script>
+
 
 </body>
 </html>
